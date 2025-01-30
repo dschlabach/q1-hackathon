@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { publicSupabase } from "@/database/client";
+import { useQuery } from "@tanstack/react-query";
 
 const TEST_GAME_JSON = JSON.stringify([
 	{
@@ -26,6 +27,28 @@ const TEST_GAME_JSON = JSON.stringify([
 export const useGame = (gameId: string) => {
 	const [game, setGame] = useState(TEST_GAME_JSON);
 
+	const { data: metadata } = useQuery({
+		queryKey: ["games", gameId],
+		queryFn: async () => {
+			const { data, error } = await publicSupabase
+				.from("games")
+				.select(`
+					*,
+					game_agents (
+						*,
+						agent: agents (*)
+					)
+				`)
+				.eq("id", gameId)
+				.single();
+
+			if (error) {
+				throw error;
+			}
+			return data;
+		},
+	});
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const channel = publicSupabase
@@ -50,5 +73,5 @@ export const useGame = (gameId: string) => {
 		};
 	}, [gameId]);
 
-	return game;
+	return { game, metadata };
 };
