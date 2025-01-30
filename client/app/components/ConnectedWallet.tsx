@@ -23,7 +23,11 @@ export default function ConnectedWallet() {
             chain={base}
           />
           <div className="flex flex-col text-green-400 group-hover:text-gray-900">
-            <Name className="font-semibold text-green-400 group-hover:text-gray-900" />
+            <Name
+              address={address}
+              chain={base}
+              className="font-semibold text-green-400 group-hover:text-gray-900"
+            />
           </div>
         </ConnectWallet>
         <WalletDropdown className="bg-gray-800 border border-green-400">
