@@ -60,7 +60,7 @@ export async function PATCH(
 		.eq("game_id", Number(gameId));
 
 	// Initialize game via serverless function
-	await fetch(`${API_URL}/api/battles/${gameId}`, {
+	await fetch(`${API_URL}/api/battle`, {
 		method: "POST",
 		body: JSON.stringify({
 			gameId,
