@@ -18,7 +18,7 @@ export const useNextAgent = () => {
 				throw new Error("Error fetching next agent ID");
 			}
 
-			return data?.[0]?.id + 1;
+			return { id: data[0].id + 1 };
 		},
 	});
 };
