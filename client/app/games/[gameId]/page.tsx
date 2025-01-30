@@ -2,6 +2,8 @@
 
 import { useGame } from "@/app/hooks/useGame";
 import { useParams } from "next/navigation";
+import ConnectedWallet from "@/app/components/ConnectedWallet";
+import Link from "next/link";
 
 type GameUpdate = {
   agent_id: number | "ORCHESTRATOR";
@@ -22,7 +24,17 @@ export default function GamePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 bg-gray-900">
+    <main className="flex min-h-screen flex-col items-center p-8 pt-20 bg-gray-900">
+      <div className="absolute top-4 left-4">
+        <Link
+          href="/profile"
+          className="text-green-400 hover:text-green-300 transition-colors flex items-center gap-2"
+        >
+          Back to Profile
+        </Link>
+      </div>
+      <ConnectedWallet />
+
       <div className="w-full max-w-6xl">
         <h1 className="text-3xl font-bold mb-8 text-center text-white">
           Battle Arena #{gameId}

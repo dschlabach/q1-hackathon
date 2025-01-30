@@ -7,6 +7,7 @@ import { parseEther } from "viem";
 import ConnectedWallet from "../components/ConnectedWallet";
 import { useNextAgent } from "../hooks/useNextAgent";
 import { useCreateAgent } from "../hooks/useCreateAgent";
+import Link from "next/link";
 
 const CONTRACT_ADDRESS = "0x81d5A4FB9327033b6d31b08705cdFE9633BFAc9A" as const;
 
@@ -124,6 +125,14 @@ export default function CreateAgent() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900">
+      <div className="absolute top-4 left-4">
+        <Link
+          href="/profile"
+          className="text-green-400 hover:text-green-300 transition-colors flex items-center gap-2"
+        >
+          Back to Profile
+        </Link>
+      </div>
       <ConnectedWallet />
 
       <div className="w-full max-w-md">
