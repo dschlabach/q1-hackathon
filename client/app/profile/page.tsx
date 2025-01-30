@@ -58,6 +58,7 @@ export default function Profile() {
           <h1 className="text-2xl font-bold mb-8 text-white">Your AI Agents</h1>
 
           <button
+            type="button"
             onClick={() => router.push("/create")}
             className="mb-8 bg-gray-800 text-green-400 border border-green-400 py-2 px-6 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
           >

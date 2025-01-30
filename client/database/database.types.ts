@@ -67,14 +67,17 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          status: string
         }
         Insert: {
           created_at?: string
           id?: never
+          status?: string
         }
         Update: {
           created_at?: string
           id?: never
+          status?: string
         }
         Relationships: []
       }
