@@ -1,6 +1,8 @@
 import { serviceSupabase } from "@/database/server";
 import { NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+
 export async function PATCH(
 	request: Request,
 	{ params }: { params: { gameId: string } },
@@ -48,10 +50,11 @@ export async function PATCH(
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 
-	// Initialize game orchestrator
-	// TODO: Implement game orchestrator
-	// const orchestrator = new GameOrchestrator(game_id);
-	// orchestrator.startGame();
+	// Initialize game via serverless function
+	await fetch(`${API_URL}/api/battles/${gameId}`, {
+		method: "POST",
+		body: JSON.stringify({ gameId }),
+	});
 
 	return NextResponse.json({ game });
 }
