@@ -11,7 +11,10 @@ export const useAgents = () => {
 	return useQuery({
 		queryKey: ["agents", address],
 		queryFn: async () => {
-			const { data, error } = await publicSupabase.from("agents").select("*");
+			const { data, error } = await publicSupabase
+				.from("agents")
+				.select("*")
+				.eq("address", address);
 			if (error) {
 				throw error;
 			}
