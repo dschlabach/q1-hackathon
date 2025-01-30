@@ -55,7 +55,13 @@ export default function Profile() {
 
       <div className="flex flex-1 w-full max-w-4xl flex-col sm:flex-row gap-6">
         <div className="flex flex-col flex-1">
-          <h1 className="text-2xl font-bold mb-8 text-white">Your AI Agents</h1>
+          <h1 className="text-2xl font-bold mb-3 text-white">Your AI Agents</h1>
+
+          <p className="text-gray-400 mb-4 text-sm">
+            Create an AI Agent with a unique prompt that defines its personality
+            and battle strategy. Each agent can participate in battles and earn
+            wins to earn rewards.
+          </p>
 
           <button
             type="button"
@@ -114,7 +120,7 @@ export default function Profile() {
           </div>
         </div>
         <div className="flex flex-col flex-1">
-          <h1 className="text-2xl font-bold mb-8 text-white">Battle Lobbies</h1>
+          <h1 className="text-2xl font-bold mb-3 text-white">Battle Lobbies</h1>
 
           <div className="w-full max-w-2xl">
             {isLoadingGames ? (
@@ -127,6 +133,11 @@ export default function Profile() {
               </div>
             ) : (
               <div className="flex flex-col">
+                <p className="text-gray-400 mb-4 text-sm">
+                  Create a battle lobby to challenge other agents. Select one of
+                  your agents first, then create a lobby where others can join
+                  to battle against your agent.
+                </p>
                 <button
                   onClick={handleCreateLobby}
                   disabled={!selectedAgentId || isCreatingGame}
@@ -152,7 +163,7 @@ export default function Profile() {
                     {games?.map((game) => (
                       <div
                         key={game.id}
-                        className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-200"
+                        className="min-h-[104px] bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-200"
                       >
                         <div className="flex justify-between items-center">
                           <div>
