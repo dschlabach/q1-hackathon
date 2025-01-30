@@ -2,20 +2,52 @@
 
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ConnectedWallet from "../components/ConnectedWallet";
 import { useAgents } from "../hooks/useAgents";
+import { useGames } from "../hooks/useGames";
+import { useCreateGame } from "../hooks/useCreateGame";
 
 export default function Profile() {
   const { isConnected } = useAccount();
   const router = useRouter();
-  const { data: agents, isLoading, error } = useAgents();
+  const {
+    data: agents,
+    isLoading: isLoadingAgents,
+    error: agentsError,
+  } = useAgents();
+  const {
+    data: games,
+    isLoading: isLoadingGames,
+    error: gamesError,
+  } = useGames();
+  const { mutate: createGame, isPending: isCreatingGame } = useCreateGame();
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isConnected) {
       router.push("/");
     }
   }, [isConnected, router]);
+
+  const handleCreateLobby = () => {
+    if (!selectedAgentId) {
+      // TODO: Add toast notification to select an agent first
+      console.error("Please select an agent first");
+      return;
+    }
+
+    createGame(selectedAgentId, {
+      onSuccess: () => {
+        // TODO: Add success toast notification
+        console.log("Lobby created successfully!");
+      },
+      onError: (error) => {
+        console.error("Failed to create lobby:", error);
+        // TODO: Add error toast notification
+      },
+    });
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 pt-20 bg-gray-900">
@@ -33,11 +65,11 @@ export default function Profile() {
           </button>
 
           <div className="w-full max-w-2xl">
-            {isLoading ? (
+            {isLoadingAgents ? (
               <div className="text-gray-400 text-center">
                 Loading your agents...
               </div>
-            ) : error ? (
+            ) : agentsError ? (
               <div className="text-red-400 text-center">
                 Error loading agents
               </div>
@@ -49,7 +81,13 @@ export default function Profile() {
               agents?.map((agent) => (
                 <div
                   key={agent.id}
-                  className="bg-gray-800 p-6 rounded-lg shadow-lg mb-4 flex items-center justify-between border border-gray-700 hover:border-green-400 transition-all duration-200"
+                  onClick={() => setSelectedAgentId(agent.id)}
+                  className={`bg-gray-800 p-6 rounded-lg shadow-lg mb-4 flex items-center justify-between border-2 transition-all duration-200 cursor-pointer
+                    ${
+                      selectedAgentId === agent.id
+                        ? "border-green-400 bg-gray-700 shadow-[0_0_20px_rgba(74,222,128,0.2)]"
+                        : "border-gray-700 hover:border-green-400"
+                    }`}
                 >
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gray-700 text-green-400 rounded-full flex items-center justify-center mr-4 border border-green-400 shadow-[0_0_10px_rgba(74,222,128,0.2)]">
@@ -66,9 +104,9 @@ export default function Profile() {
                       </p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]">
-                    Battle
-                  </button>
+                  <div className="text-green-400">
+                    {selectedAgentId === agent.id && "Selected ✓"}
+                  </div>
                 </div>
               ))
             )}
@@ -78,24 +116,34 @@ export default function Profile() {
           <h1 className="text-2xl font-bold mb-8 text-white">Battle Lobbys</h1>
 
           <div className="w-full max-w-2xl">
-            {isLoading ? (
+            {isLoadingGames ? (
               <div className="text-gray-400 text-center">
-                Loading your Lobby rooms...
+                Loading lobby rooms...
               </div>
-            ) : error ? (
+            ) : gamesError ? (
               <div className="text-red-400 text-center">
-                Error loading Lobby rooms
+                Error loading lobby rooms
               </div>
             ) : (
               <div className="flex flex-col">
                 <button
-                  onClick={() => console.log("create new lobby")}
-                  className="mb-8 bg-gray-800 text-green-400 border border-green-400 py-2 px-6 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
+                  onClick={handleCreateLobby}
+                  disabled={!selectedAgentId || isCreatingGame}
+                  className={`mb-8 py-2 px-6 rounded-md transition-all duration-200 
+                    ${
+                      selectedAgentId && !isCreatingGame
+                        ? "bg-gray-800 text-green-400 border border-green-400 hover:bg-green-400 hover:text-gray-900 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
+                        : "bg-gray-700 text-gray-500 border border-gray-600 cursor-not-allowed"
+                    }`}
                 >
-                  Create New Lobby
+                  {isCreatingGame
+                    ? "Creating Lobby..."
+                    : selectedAgentId
+                    ? "Create New Lobby"
+                    : "Select an Agent First"}
                 </button>
                 <div className="text-gray-400 text-center">
-                  There are no lobby rooms active. Create one started!
+                  There are no lobby rooms active. Create one to get started!
                 </div>
               </div>
             )}
