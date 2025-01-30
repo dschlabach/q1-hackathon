@@ -14,18 +14,21 @@ export type Database = {
           created_at: string
           health: number | null
           id: number
+          name: string | null
           prompt: string | null
         }
         Insert: {
           created_at?: string
           health?: number | null
           id?: number
+          name?: string | null
           prompt?: string | null
         }
         Update: {
           created_at?: string
           health?: number | null
           id?: number
+          name?: string | null
           prompt?: string | null
         }
         Relationships: []
