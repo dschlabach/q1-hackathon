@@ -2,22 +2,11 @@ import { useEffect, useState } from "react";
 import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
-const TEST_GAME_JSON = JSON.stringify([
-	{
-		agent_id: 1,
-		text: "this is some text for a round",
-		health: 100,
-	},
-	{
-		agent_id: 2,
-		text: "this is some text for a round",
-		health: 90,
-	},
-	{
-		agent_id: "ORCHESTRATOR",
-		text: "ORCHESTRATOR text",
-	},
-]);
+export type GameUpdate = {
+	agent_id: number | "ORCHESTRATOR";
+	text: string;
+	health?: number;
+};
 
 /**
  * Streams game events from the Supabase realtime API
@@ -25,7 +14,7 @@ const TEST_GAME_JSON = JSON.stringify([
  * @returns The game data
  */
 export const useGame = (gameId: string) => {
-	const [game, setGame] = useState(TEST_GAME_JSON);
+	const [game, setGame] = useState<GameUpdate[]>([]);
 
 	const { data: metadata } = useQuery({
 		queryKey: ["games", gameId],
@@ -39,7 +28,7 @@ export const useGame = (gameId: string) => {
 						agent: agents (*)
 					)
 				`)
-				.eq("id", gameId)
+				.eq("id", Number(gameId))
 				.single();
 
 			if (error) {
@@ -63,7 +52,7 @@ export const useGame = (gameId: string) => {
 				},
 				(payload) => {
 					console.log("payload:", payload);
-					setGame([...game, payload]);
+					setGame([...game, payload as unknown as GameUpdate]);
 				},
 			)
 			.subscribe();
