@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  Wallet,
-  ConnectWallet,
-  WalletDropdown,
-  WalletDropdownDisconnect,
-} from "@coinbase/onchainkit/wallet";
-import { Avatar, Name, Identity, Address } from "@coinbase/onchainkit/identity";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ConnectedWallet from "../components/ConnectedWallet";
 
 export default function CreateAgent() {
   const { isConnected } = useAccount();
@@ -33,24 +27,7 @@ export default function CreateAgent() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900">
-      <div className="absolute top-4 right-4">
-        <Wallet>
-          <ConnectWallet>
-            <Avatar className="h-8 w-8" />
-            <div className="flex flex-col">
-              <Name className="font-semibold" />
-            </div>
-          </ConnectWallet>
-          <WalletDropdown>
-            <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-              <Avatar />
-              <Name />
-              <Address />
-            </Identity>
-            <WalletDropdownDisconnect />
-          </WalletDropdown>
-        </Wallet>
-      </div>
+      <ConnectedWallet />
 
       <div className="w-full max-w-md">
         <h1 className="text-4xl font-bold mb-8 text-center text-white">
