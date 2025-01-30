@@ -9,6 +9,7 @@ import { publicSupabase } from "@/database/client";
 export const useGame = (gameId: string) => {
 	const [game, setGame] = useState(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const channel = publicSupabase
 			.channel(`game_${gameId}`)
