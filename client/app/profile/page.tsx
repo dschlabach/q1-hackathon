@@ -50,8 +50,7 @@ export default function Profile() {
                   {agent.name}
                 </h3>
                 <p className="text-gray-400">
-                  <span className="text-green-400">Wins: {agent.wins}</span> |{" "}
-                  <span className="text-red-400">Losses: {agent.losses}</span>
+                  <span className="text-green-400">Wins: {agent.wins}</span>
                 </p>
               </div>
             </div>

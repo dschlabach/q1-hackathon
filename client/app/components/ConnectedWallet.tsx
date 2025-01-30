@@ -26,13 +26,19 @@ export default function ConnectedWallet() {
             <Name className="font-semibold text-green-400 group-hover:text-gray-900" />
           </div>
         </ConnectWallet>
-        <WalletDropdown>
-          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar address={address} />
-            <Name className="text-white" />
-            <Address className="text-gray-400" />
+        <WalletDropdown className="bg-gray-800 border border-green-400">
+          <Identity
+            className="px-4 pt-3 pb-2 bg-gray-800"
+            hasCopyAddressOnClick
+          >
+            <Avatar
+              address={address}
+              chain={base}
+              className="h-8 w-8 rounded-full bg-green-400 opacity-90 group-hover:opacity-100"
+            />
+            <Address className="text-gray-300" />
           </Identity>
-          <WalletDropdownDisconnect className="text-red-400 hover:text-white" />
+          <WalletDropdownDisconnect className="bg-gray-800 text-white fill-white hover:text-white hover:bg-gray-700" />
         </WalletDropdown>
       </Wallet>
     </div>
