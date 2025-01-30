@@ -10,7 +10,13 @@ export const useGames = () => {
 		queryFn: async () => {
 			const { data, error } = await publicSupabase
 				.from("games")
-				.select("*")
+				.select(`
+					*,
+					game_agents (
+						*,
+						agent: agents (*)
+					)
+				`)
 				.neq("status", "finished");
 
 			if (error) {

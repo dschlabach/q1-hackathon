@@ -22,7 +22,7 @@ export const useGame = (gameId: string) => {
 				},
 				(payload) => {
 					console.log("payload:", payload);
-					setGame(payload);
+					setGame([...game, payload]);
 				},
 			)
 			.subscribe();
