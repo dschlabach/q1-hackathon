@@ -1,19 +1,35 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient, usePublicClient } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { parseEther } from "viem";
 import ConnectedWallet from "../components/ConnectedWallet";
 import { useNextAgent } from "../hooks/useNextAgent";
 import { useCreateAgent } from "../hooks/useCreateAgent";
 
+const CONTRACT_ADDRESS = "0x81d5A4FB9327033b6d31b08705cdFE9633BFAc9A" as const;
+
+const CONTRACT_ABI = [
+  {
+    inputs: [{ name: "_id", type: "uint256" }],
+    name: "createAgent",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+] as const;
+
 export default function CreateAgent() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const router = useRouter();
   const [agentName, setAgentName] = useState("");
   const [agentPrompt, setAgentPrompt] = useState("");
   const { data: nextAgent } = useNextAgent();
   const { mutate: createAgent, isPending: isCreating } = useCreateAgent();
+  const [isContractLoading, setIsContractLoading] = useState(false);
 
   const isFormValid = agentName.trim() !== "" && agentPrompt.trim() !== "";
 
@@ -30,18 +46,30 @@ export default function CreateAgent() {
       // TODO: Add toast notification
       return;
     }
+    if (!address || !walletClient || !publicClient) {
+      alert("Please connect your wallet first");
+      return;
+    }
 
     try {
-      // TODO: Call smart contract here
-      // After smart contract confirmation:
-      console.log(
-        "Creating agent with ID:",
-        nextAgent.id,
-        "name:",
-        agentName,
-        "prompt:",
-        agentPrompt
-      );
+      setIsContractLoading(true);
+
+      // Call smart contract
+      const hash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: "createAgent",
+        args: [BigInt(nextAgent.id)],
+        value: parseEther("0.01"),
+      });
+
+      console.log("Transaction hash:", hash);
+
+      // Wait for transaction confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      console.log("Transaction confirmed:", receipt);
+
+      // After smart contract confirmation, create agent in backend
       createAgent(
         {
           id: nextAgent.id,
@@ -54,15 +82,45 @@ export default function CreateAgent() {
           },
           onError: (error) => {
             console.error("Failed to create agent:", error);
+
+            // Check if it's an insufficient funds error
+            if (
+              error instanceof Error &&
+              error.message.includes("exceeds the balance of the account")
+            ) {
+              alert(
+                "Insufficient funds on Base Sepolia network. Please make sure you have enough Base Sepolia ETH (not regular Sepolia ETH) to cover the transaction (0.01 ETH + gas fees). You can get Base Sepolia ETH from the faucet at https://www.coinbase.com/faucets/base-sepolia-faucet"
+              );
+            } else {
+              alert(
+                "Error creating agent. Please check the console for details."
+              );
+            }
             // TODO: Add error toast notification
           },
         }
       );
     } catch (error) {
       console.error("Error creating agent:", error);
+
+      // Check if it's an insufficient funds error
+      if (
+        error instanceof Error &&
+        error.message.includes("exceeds the balance of the account")
+      ) {
+        alert(
+          "Insufficient funds on Base Sepolia network. Please make sure you have enough Base Sepolia ETH (not regular Sepolia ETH) to cover the transaction (0.01 ETH + gas fees). You can get Base Sepolia ETH from the faucet at https://www.coinbase.com/faucets/base-sepolia-faucet"
+        );
+      } else {
+        alert("Error creating agent. Please check the console for details.");
+      }
       // TODO: Add error toast notification
+    } finally {
+      setIsContractLoading(false);
     }
   };
+
+  const isLoading = isCreating || isContractLoading;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900">
@@ -114,7 +172,7 @@ export default function CreateAgent() {
           <div className="mb-6">
             <div className="flex justify-between items-center text-sm">
               <span className="text-green-400">Creation Price</span>
-              <span className="text-white">0.009 ETH</span>
+              <span className="text-white">0.01 ETH</span>
             </div>
             <div className="mt-2 text-sm text-gray-400">
               This is a one-time fee to create your agent
@@ -122,15 +180,19 @@ export default function CreateAgent() {
           </div>
           <button
             onClick={handleCreate}
-            disabled={!isFormValid || isCreating}
+            disabled={!isFormValid || isLoading}
             className={`w-full py-2 px-4 rounded-md transition-all duration-200 
               ${
-                isFormValid && !isCreating
+                isFormValid && !isLoading
                   ? "bg-gray-700 text-green-400 border border-green-400 hover:bg-green-400 hover:text-gray-900 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
                   : "bg-gray-700 text-gray-500 border border-gray-600 cursor-not-allowed"
               }`}
           >
-            {isCreating ? "Creating Agent..." : "Create Agent"}
+            {isContractLoading
+              ? "Creating on Blockchain..."
+              : isCreating
+              ? "Saving Agent..."
+              : "Create Agent"}
           </button>
         </div>
       </div>

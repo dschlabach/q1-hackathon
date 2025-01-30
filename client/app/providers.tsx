@@ -2,19 +2,19 @@
 
 import { WagmiProvider, createConfig } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { base } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import { coinbaseWallet } from "@wagmi/connectors";
 import { http } from "viem";
 
 const config = createConfig({
-  chains: [base],
+  chains: [baseSepolia],
   connectors: [
     coinbaseWallet({
-      appName: "My Web3 App",
+      appName: "Agent Battle",
     }),
   ],
   transports: {
-    [base.id]: http(),
+    [baseSepolia.id]: http("https://sepolia.base.org"),
   },
 });
 
