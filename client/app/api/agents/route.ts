@@ -3,8 +3,8 @@ import { serviceSupabase } from "@/database/server";
 const STARTING_HEALTH = 100;
 
 export async function POST(request: Request) {
-	const { id, address, prompt, name } = await request.json();
-	if (!id || !address || !prompt || !name) {
+	const { id, prompt, name } = await request.json();
+	if (!id || !prompt || !name) {
 		return new Response(JSON.stringify({ error: "Missing required fields" }), {
 			status: 400,
 		});
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
 	const { data, error } = await serviceSupabase
 		.from("agents")
-		.insert({ id, prompt, health: STARTING_HEALTH, address, name });
+		.insert({ id, prompt, health: STARTING_HEALTH, name });
 
 	if (error) {
 		return new Response(JSON.stringify({ error: error.message }), {
