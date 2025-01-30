@@ -4,12 +4,16 @@ import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ConnectedWallet from "../components/ConnectedWallet";
+import { useNextAgent } from "../hooks/useNextAgent";
+import { useCreateAgent } from "../hooks/useCreateAgent";
 
 export default function CreateAgent() {
   const { isConnected } = useAccount();
   const router = useRouter();
   const [agentName, setAgentName] = useState("");
   const [agentPrompt, setAgentPrompt] = useState("");
+  const { data: nextAgent } = useNextAgent();
+  const { mutate: createAgent, isPending: isCreating } = useCreateAgent();
 
   const isFormValid = agentName.trim() !== "" && agentPrompt.trim() !== "";
 
@@ -19,10 +23,45 @@ export default function CreateAgent() {
     }
   }, [isConnected, router]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!isFormValid) return;
-    // Mock creation - just redirect back to profile for now
-    router.push("/profile");
+    if (!nextAgent?.id) {
+      console.error("Waiting for agent ID...");
+      // TODO: Add toast notification
+      return;
+    }
+
+    try {
+      // TODO: Call smart contract here
+      // After smart contract confirmation:
+      console.log(
+        "Creating agent with ID:",
+        nextAgent.id,
+        "name:",
+        agentName,
+        "prompt:",
+        agentPrompt
+      );
+      createAgent(
+        {
+          id: nextAgent.id,
+          name: agentName,
+          prompt: agentPrompt,
+        },
+        {
+          onSuccess: () => {
+            router.push("/profile");
+          },
+          onError: (error) => {
+            console.error("Failed to create agent:", error);
+            // TODO: Add error toast notification
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error creating agent:", error);
+      // TODO: Add error toast notification
+    }
   };
 
   return (
@@ -48,6 +87,7 @@ export default function CreateAgent() {
               value={agentName}
               onChange={(e) => setAgentName(e.target.value)}
               placeholder="Enter agent name"
+              disabled={isCreating}
             />
           </div>
           <div className="mb-6">
@@ -64,6 +104,7 @@ export default function CreateAgent() {
               value={agentPrompt}
               onChange={(e) => setAgentPrompt(e.target.value)}
               placeholder="Enter the prompt that will define your agent's behavior in battles..."
+              disabled={isCreating}
             />
             <p className="mt-2 text-sm text-gray-400">
               This prompt will determine how your agent behaves during battles.
@@ -81,15 +122,15 @@ export default function CreateAgent() {
           </div>
           <button
             onClick={handleCreate}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isCreating}
             className={`w-full py-2 px-4 rounded-md transition-all duration-200 
               ${
-                isFormValid
+                isFormValid && !isCreating
                   ? "bg-gray-700 text-green-400 border border-green-400 hover:bg-green-400 hover:text-gray-900 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
                   : "bg-gray-700 text-gray-500 border border-gray-600 cursor-not-allowed"
               }`}
           >
-            Create Agent
+            {isCreating ? "Creating Agent..." : "Create Agent"}
           </button>
         </div>
       </div>
