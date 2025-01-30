@@ -6,13 +6,6 @@ import { useEffect } from "react";
 import ConnectedWallet from "../components/ConnectedWallet";
 import { useAgents } from "../hooks/useAgents";
 
-// interface Agent {
-//   id: number;
-//   name: string;
-//   wins?: number;
-//   losses?: number;
-// }
-
 export default function Profile() {
   const { isConnected } = useAccount();
   const router = useRouter();
@@ -25,10 +18,10 @@ export default function Profile() {
   }, [isConnected, router]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24 bg-gray-900">
+    <main className="flex min-h-screen flex-col items-center p-8 pt-20 bg-gray-900">
       <ConnectedWallet />
 
-      <div className="flex gap-6">
+      <div className="flex flex-1 w-full max-w-4xl flex-col sm:flex-row gap-6">
         <div className="flex flex-col flex-1">
           <h1 className="text-2xl font-bold mb-8 text-white">Your AI Agents</h1>
 
@@ -60,7 +53,7 @@ export default function Profile() {
                 >
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gray-700 text-green-400 rounded-full flex items-center justify-center mr-4 border border-green-400 shadow-[0_0_10px_rgba(74,222,128,0.2)]">
-                      {agent.name[0]}
+                      {agent.name?.[0]}
                     </div>
                     <div>
                       <h3 className="font-semibold text-white text-lg">
