@@ -3,7 +3,7 @@ import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
 export type GameUpdate = {
-	agent_id: number | "ORCHESTRATOR";
+	agent_id: number;
 	text: string;
 	health?: number;
 };

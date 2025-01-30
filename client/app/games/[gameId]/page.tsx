@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import ConnectedWallet from "@/app/components/ConnectedWallet";
 import Link from "next/link";
 
+const ORCHESTRATOR_ID = 9999999;
+
 export default function GamePage() {
 	const { gameId } = useParams();
 	const { game, metadata } = useGame(gameId as string);
@@ -64,7 +66,7 @@ export default function GamePage() {
 								{game?.map((update: GameUpdate, index: number) => (
 									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 									<div key={index} className="mb-2">
-										{update.agent_id === "ORCHESTRATOR" ? (
+										{update.agent_id === ORCHESTRATOR_ID ? (
 											<p className="text-yellow-400 text-center">
 												{update.text}
 											</p>
