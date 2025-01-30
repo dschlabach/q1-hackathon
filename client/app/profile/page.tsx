@@ -220,12 +220,24 @@ export default function Profile() {
                               ))}
                             </div>
                           </div>
-                          <button
-                            onClick={() => console.log("Join game", game.id)}
-                            className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
-                          >
-                            Join Battle
-                          </button>
+                          {game.game_agents.length < 2 && selectedAgentId && (
+                            <button
+                              onClick={() => router.push(`/games/${game.id}`)}
+                              className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                            >
+                              Join Battle
+                            </button>
+                          )}
+                          {game.game_agents.length >= 2 && (
+                            <span className="text-gray-500 text-sm">
+                              Battle in progress
+                            </span>
+                          )}
+                          {game.game_agents.length < 2 && !selectedAgentId && (
+                            <span className="text-gray-500 text-sm">
+                              Select an agent to join
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
