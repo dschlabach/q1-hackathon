@@ -114,7 +114,7 @@ export default function Profile() {
           </div>
         </div>
         <div className="flex flex-col flex-1">
-          <h1 className="text-2xl font-bold mb-8 text-white">Battle Lobbys</h1>
+          <h1 className="text-2xl font-bold mb-8 text-white">Battle Lobbies</h1>
 
           <div className="w-full max-w-2xl">
             {isLoadingGames ? (
@@ -143,9 +143,38 @@ export default function Profile() {
                     ? "Create New Lobby"
                     : "Select an Agent First"}
                 </button>
-                <div className="text-gray-400 text-center">
-                  There are no lobby rooms active. Create one to get started!
-                </div>
+                {games?.length === 0 ? (
+                  <div className="text-gray-400 text-center">
+                    There are no lobby rooms active. Create one to get started!
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {games?.map((game) => (
+                      <div
+                        key={game.id}
+                        className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-200"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="text-white font-semibold">
+                              Game #{game.id}
+                            </h3>
+                            <p className="text-gray-400 text-sm mt-1">
+                              Created{" "}
+                              {new Date(game.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => console.log("Join game", game.id)}
+                            className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                          >
+                            Join Battle
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
