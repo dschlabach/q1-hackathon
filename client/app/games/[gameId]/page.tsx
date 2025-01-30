@@ -3,40 +3,23 @@
 import { useGame } from "@/app/hooks/useGame";
 import { useParams } from "next/navigation";
 
-// Mock data for when real data is not available
-const mockGame = {
-  id: 1,
-  created_at: new Date().toISOString(),
-  game_agents: [
-    {
-      agent: {
-        id: 1,
-        name: "Agent Smith",
-        prompt: "Strategic AI",
-        health: 100,
-        address: "0x123",
-        created_at: new Date().toISOString(),
-      },
-    },
-    {
-      agent: {
-        id: 2,
-        name: "Agent Neo",
-        prompt: "Tactical AI",
-        health: 100,
-        address: "0x456",
-        created_at: new Date().toISOString(),
-      },
-    },
-  ],
+type GameUpdate = {
+  agent_id: number | "ORCHESTRATOR";
+  text: string;
+  health?: number;
 };
 
 export default function GamePage() {
   const { gameId } = useParams();
-  const gameData = useGame(gameId as string);
+  const { game, metadata } = useGame(gameId as string);
 
-  // Use real data if available, otherwise use mock data
-  const game = gameData || mockGame;
+  if (!metadata) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-900">
+        <div className="text-green-400">Loading battle...</div>
+      </div>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gray-900">
@@ -49,17 +32,17 @@ export default function GamePage() {
           {/* Left Agent */}
           <div className="flex-1">
             <div className="bg-gray-800 p-6 rounded-lg border-2 border-green-400">
-              {game.game_agents[0] && (
+              {metadata.game_agents[0] && (
                 <div>
                   <div className="w-16 h-16 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-2xl border-2 border-green-400 mx-auto mb-4">
-                    {game.game_agents[0].agent.name?.[0]}
+                    {metadata.game_agents[0].agent.name?.[0]}
                   </div>
                   <h2 className="text-xl font-bold text-center text-white mb-2">
-                    {game.game_agents[0].agent.name}
+                    {metadata.game_agents[0].agent.name}
                   </h2>
                   <div className="flex justify-center gap-4 text-sm">
                     <span className="text-green-400">
-                      HP: {game.game_agents[0].agent.health}
+                      HP: {metadata.game_agents[0].agent.health}
                     </span>
                   </div>
                 </div>
@@ -69,29 +52,48 @@ export default function GamePage() {
 
           {/* Battle Text Area */}
           <div className="flex-[2] bg-gray-800 p-6 rounded-lg border border-gray-700 min-h-[300px]">
-            <div className="h-full flex items-center justify-center">
-              <p className="text-gray-400 text-center">
-                {game.game_agents.length < 2
+            <div className="h-full flex flex-col">
+              <div className="flex-1 overflow-y-auto">
+                {/* Parse the game JSON string and display battle text */}
+                {game &&
+                  JSON.parse(game).map((update: GameUpdate, index: number) => (
+                    <div key={index} className="mb-2">
+                      {update.agent_id === "ORCHESTRATOR" ? (
+                        <p className="text-yellow-400 text-center">
+                          {update.text}
+                        </p>
+                      ) : (
+                        <p className="text-green-400">
+                          Agent {update.agent_id}: {update.text}
+                          {update.health !== undefined &&
+                            ` (HP: ${update.health})`}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+              </div>
+              <div className="text-gray-400 text-center mt-4">
+                {metadata.game_agents.length < 2
                   ? "Waiting for opponent..."
-                  : "Battle will begin soon..."}
-              </p>
+                  : "Battle in progress..."}
+              </div>
             </div>
           </div>
 
           {/* Right Agent */}
           <div className="flex-1">
             <div className="bg-gray-800 p-6 rounded-lg border-2 border-green-400">
-              {game.game_agents[1] ? (
+              {metadata.game_agents[1] ? (
                 <div>
                   <div className="w-16 h-16 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-2xl border-2 border-green-400 mx-auto mb-4">
-                    {game.game_agents[1].agent.name?.[0]}
+                    {metadata.game_agents[1].agent.name?.[0]}
                   </div>
                   <h2 className="text-xl font-bold text-center text-white mb-2">
-                    {game.game_agents[1].agent.name}
+                    {metadata.game_agents[1].agent.name}
                   </h2>
                   <div className="flex justify-center gap-4 text-sm">
                     <span className="text-green-400">
-                      HP: {game.game_agents[1].agent.health}
+                      HP: {metadata.game_agents[1].agent.health}
                     </span>
                   </div>
                 </div>

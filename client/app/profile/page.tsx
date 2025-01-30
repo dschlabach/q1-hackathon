@@ -28,7 +28,7 @@ type Game = {
 };
 
 export default function Profile() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const router = useRouter();
   const {
     data: agents,
@@ -46,6 +46,60 @@ export default function Profile() {
   };
   const { mutate: createGame, isPending: isCreatingGame } = useCreateGame();
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
+
+  // Helper function to check if an agent belongs to the current user
+  const isMyAgent = (agentAddress: string) => {
+    return address?.toLowerCase() === agentAddress?.toLowerCase();
+  };
+
+  // Helper function to check if the user has an agent in a game
+  const getMyAgentInGame = (game: Game) => {
+    return game.game_agents.find((ga) => isMyAgent(ga.agent.address));
+  };
+
+  // Helper function to check if selected agent is already in a game
+  const isSelectedAgentInGame = (game: Game) => {
+    return game.game_agents.some((ga) => ga.agent.id === selectedAgentId);
+  };
+
+  const handleJoinBattle = async (game: Game) => {
+    if (!selectedAgentId) {
+      alert("Please select an agent first");
+      return;
+    }
+
+    const myAgentInGame = getMyAgentInGame(game);
+
+    // If my agent is already in this game, redirect to the game page
+    if (myAgentInGame) {
+      router.push(`/games/${game.id}`);
+      return;
+    }
+
+    // If I have the selected agent in another game, don't allow joining
+    const isSelectedAgentBusy = games?.some((g) => isSelectedAgentInGame(g));
+    if (isSelectedAgentBusy) {
+      alert("This agent is already in another game");
+      return;
+    }
+
+    // If someone else's agent is in the game and it's not full, join it
+    if (game.game_agents.length < 2 && !getMyAgentInGame(game)) {
+      try {
+        await fetch("/api/games/join", {
+          method: "POST",
+          body: JSON.stringify({
+            gameId: game.id,
+            agentId: selectedAgentId,
+          }),
+        });
+        router.push(`/games/${game.id}`);
+      } catch (error) {
+        console.error("Failed to join game:", error);
+        alert("Failed to join game. Please try again.");
+      }
+    }
+  };
 
   useEffect(() => {
     console.log("games", games);
@@ -210,8 +264,16 @@ export default function Profile() {
                                   <div className="w-6 h-6 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-xs border border-green-400">
                                     {gameAgent.agent.name?.[0]}
                                   </div>
-                                  <span className="text-green-400 text-sm">
+                                  <span
+                                    className={`text-sm ${
+                                      isMyAgent(gameAgent.agent.address)
+                                        ? "text-green-400"
+                                        : "text-gray-400"
+                                    }`}
+                                  >
                                     {gameAgent.agent.name}
+                                    {isMyAgent(gameAgent.agent.address) &&
+                                      " (You)"}
                                   </span>
                                   <span className="text-gray-500 text-xs">
                                     (HP: {gameAgent.agent.health})
@@ -219,25 +281,44 @@ export default function Profile() {
                                 </div>
                               ))}
                             </div>
+                            <div className="mt-4 flex items-center gap-4">
+                              {/* Show different buttons/text based on game state */}
+                              {game.game_agents.length >= 2 ? (
+                                <span className="text-gray-500 text-sm">
+                                  Battle in progress
+                                </span>
+                              ) : getMyAgentInGame(game) ? (
+                                <button
+                                  onClick={() =>
+                                    router.push(`/games/${game.id}`)
+                                  }
+                                  className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                                >
+                                  Return to Battle
+                                </button>
+                              ) : selectedAgentId &&
+                                !isSelectedAgentInGame(game) ? (
+                                <button
+                                  onClick={() => handleJoinBattle(game)}
+                                  className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                                >
+                                  Join Battle
+                                </button>
+                              ) : (
+                                <span className="text-gray-500 text-sm">
+                                  Select an agent to join
+                                </span>
+                              )}
+
+                              {/* Spectate link */}
+                              <button
+                                onClick={() => router.push(`/games/${game.id}`)}
+                                className="text-gray-400 text-sm hover:text-green-400 transition-colors"
+                              >
+                                Spectate
+                              </button>
+                            </div>
                           </div>
-                          {game.game_agents.length < 2 && selectedAgentId && (
-                            <button
-                              onClick={() => router.push(`/games/${game.id}`)}
-                              className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
-                            >
-                              Join Battle
-                            </button>
-                          )}
-                          {game.game_agents.length >= 2 && (
-                            <span className="text-gray-500 text-sm">
-                              Battle in progress
-                            </span>
-                          )}
-                          {game.game_agents.length < 2 && !selectedAgentId && (
-                            <span className="text-gray-500 text-sm">
-                              Select an agent to join
-                            </span>
-                          )}
                         </div>
                       </div>
                     ))}
