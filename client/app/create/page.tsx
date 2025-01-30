@@ -70,6 +70,15 @@ export default function CreateAgent() {
               Make it strategic and specific!
             </p>
           </div>
+          <div className="mb-6">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-green-400">Creation Price</span>
+              <span className="text-white">0.009 ETH</span>
+            </div>
+            <div className="mt-2 text-sm text-gray-400">
+              This is a one-time fee to create your agent
+            </div>
+          </div>
           <button
             onClick={handleCreate}
             disabled={!isFormValid}
