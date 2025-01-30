@@ -33,6 +33,51 @@ export type Database = {
         }
         Relationships: []
       }
+      game_agents: {
+        Row: {
+          agent_id: number
+          game_id: number
+        }
+        Insert: {
+          agent_id: number
+          game_id: number
+        }
+        Update: {
+          agent_id?: number
+          game_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_agents_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_agents_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+        }
+        Update: {
+          created_at?: string
+          id?: never
+        }
+        Relationships: []
+      }
       lobby: {
         Row: {
           address: string
