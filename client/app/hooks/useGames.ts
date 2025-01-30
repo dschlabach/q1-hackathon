@@ -8,7 +8,11 @@ export const useGames = () => {
 	return useQuery({
 		queryKey: ["games"],
 		queryFn: async () => {
-			const { data, error } = await publicSupabase.from("games").select("*");
+			const { data, error } = await publicSupabase
+				.from("games")
+				.select("*")
+				.neq("status", "finished");
+
 			if (error) {
 				throw error;
 			}

@@ -40,21 +40,26 @@ export async function POST(request: Request) {
 	// Check if agent is already in a game
 	const { data: gameAgent, error: gameAgentError } = await serviceSupabase
 		.from("game_agents")
-		.select("*")
+		.select(`
+			*,
+			games (*)
+		`)
 		.eq("agent_id", agentId)
 		.single();
 
-	if (gameAgentError) {
-		return NextResponse.json(
-			{ error: gameAgentError.message },
-			{ status: 500 },
-		);
-	}
-
+	// TODO:  check state
 	if (gameAgent) {
 		return NextResponse.json(
 			{ error: "Agent is already in a game" },
 			{ status: 400 },
+		);
+	}
+
+	// Only handle non-"not found" errors
+	if (gameAgentError && gameAgentError.code !== "PGRST116") {
+		return NextResponse.json(
+			{ error: gameAgentError.message },
+			{ status: 500 },
 		);
 	}
 
