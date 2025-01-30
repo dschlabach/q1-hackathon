@@ -71,7 +71,8 @@ async function saveGameUpdate(
 ) {
 	const { error } = await serviceSupabase.from("game_updates").insert({
 		game_id: gameId,
-		agent_id: update.agent_id,
+		agent_id:
+			update.agent_id === "ORCHESTRATOR" ? ORCHESTRATOR_ID : update.agent_id,
 		text: update.text,
 		health: update.health,
 	});
