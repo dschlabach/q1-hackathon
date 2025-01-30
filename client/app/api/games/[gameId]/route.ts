@@ -1,48 +1,30 @@
 import { serviceSupabase } from "@/database/server";
 import { NextResponse } from "next/server";
 
-/**
- * Creates a new game
- * @param request
- */
-export async function POST(request: Request) {
+export async function PATCH(
+	request: Request,
+	{ params }: { params: { gameId: string } },
+) {
+	const { gameId } = params;
 	const { agentId } = await request.json();
-
-	if (!agentId) {
+	if (!gameId) {
+		return NextResponse.json({ error: "Game ID is required" }, { status: 400 });
+	}
+	if (!agentId || typeof agentId !== "number") {
 		return NextResponse.json(
-			{ error: "Agent ID is required" },
+			{ error: "Agent ID is required and must be a number" },
 			{ status: 400 },
 		);
 	}
 
-	if (typeof agentId !== "number") {
-		return NextResponse.json(
-			{ error: "Agent ID must be a number" },
-			{ status: 400 },
-		);
-	}
-
-	// Ensure agent is alive
-	const { data: agent, error: agentError } = await serviceSupabase
-		.from("agents")
-		.select("*")
-		.eq("id", agentId)
-		.single();
-
-	if (agentError) {
-		return NextResponse.json({ error: agentError.message }, { status: 500 });
-	}
-
-	if (agent?.health && agent?.health <= 0) {
-		return NextResponse.json({ error: "Agent is dead" }, { status: 400 });
-	}
-
-	// Check if agent is already in a game
-	const { data: gameAgent, error: gameAgentError } = await serviceSupabase
+	// Add agent to game_agents table
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { data: _gameAgent, error: gameAgentError } = await serviceSupabase
 		.from("game_agents")
-		.select("*")
-		.eq("agent_id", agentId)
-		.single();
+		.insert({
+			game_id: Number(gameId),
+			agent_id: agentId,
+		});
 
 	if (gameAgentError) {
 		return NextResponse.json(
@@ -51,37 +33,25 @@ export async function POST(request: Request) {
 		);
 	}
 
-	if (gameAgent) {
-		return NextResponse.json(
-			{ error: "Agent is already in a game" },
-			{ status: 400 },
-		);
-	}
-
-	// Create a new game
-	const { data: game, error: gameError } = await serviceSupabase
+	// Join the game and start it
+	const { data: game, error } = await serviceSupabase
 		.from("games")
-		.insert({
-			created_at: new Date().toISOString(),
+		.update({
+			status: "in_progress",
 		})
-		.select("*")
+		.eq("id", Number(gameId))
+		.eq("status", "waiting") // Ensure game is still waiting
+		.select()
 		.single();
 
-	if (gameError) {
-		return NextResponse.json({ error: gameError.message }, { status: 500 });
+	if (error) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 
-	// Insert agent into game_agents
-	const { error: insertError } = await serviceSupabase
-		.from("game_agents")
-		.insert({
-			game_id: game.id,
-			agent_id: agentId,
-		});
+	// Initialize game orchestrator
+	// TODO: Implement game orchestrator
+	// const orchestrator = new GameOrchestrator(game_id);
+	// orchestrator.startGame();
 
-	if (insertError) {
-		return NextResponse.json({ error: insertError.message }, { status: 500 });
-	}
-
-	return NextResponse.json(game, { status: 201 });
+	return NextResponse.json({ game });
 }
