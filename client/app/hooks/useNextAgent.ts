@@ -20,5 +20,6 @@ export const useNextAgent = () => {
 
 			return { id: data[0].id + 1 };
 		},
+		refetchInterval: 5000,
 	});
 };
