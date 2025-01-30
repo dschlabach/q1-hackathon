@@ -5,6 +5,10 @@ export async function GET(
 	// TODO: implement GET
 }
 
+/**
+ * Creates a new game
+ * @param request
+ */
 export async function POST(
 	request: Request,
 	{ params }: { params: { gameId: string } },
