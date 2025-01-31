@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -38,29 +38,22 @@ export const useGame = (gameId: string) => {
 		},
 	});
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		const channel = publicSupabase
-			.channel(`game_${gameId}`)
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "game_updates",
-					filter: `game_id=eq.${gameId}`,
-				},
-				(payload) => {
-					console.log("payload:", payload);
-					setGame([...game, payload as unknown as GameUpdate]);
-				},
-			)
-			.subscribe();
-
-		return () => {
-			publicSupabase.removeChannel(channel);
-		};
-	}, [gameId]);
+	publicSupabase
+		.channel(`game_${gameId}`)
+		.on(
+			"postgres_changes",
+			{
+				event: "*",
+				schema: "public",
+				table: "game_updates",
+				filter: `game_id=eq.${gameId}`,
+			},
+			(payload) => {
+				console.log("payload:", payload);
+				setGame([...game, payload as unknown as GameUpdate]);
+			},
+		)
+		.subscribe();
 
 	return { game, metadata };
 };
