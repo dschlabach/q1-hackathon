@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -38,22 +38,28 @@ export const useGame = (gameId: string) => {
 		},
 	});
 
-	publicSupabase
-		.channel(`game_${gameId}`)
-		.on(
-			"postgres_changes",
-			{
-				event: "*",
-				schema: "public",
-				table: "game_updates",
-				filter: `game_id=eq.${gameId}`,
-			},
-			(payload) => {
-				console.log("payload:", payload);
-				setGame([...game, payload as unknown as GameUpdate]);
-			},
-		)
-		.subscribe();
+	useEffect(() => {
+		const channel = publicSupabase
+			.channel("game_updates")
+			.on(
+				"postgres_changes",
+				{
+					event: "INSERT",
+					schema: "public",
+					table: "game_updates",
+					filter: `game_id=eq.${gameId}`,
+				},
+				(payload) => {
+					console.log("payload:", payload);
+					setGame((current) => [...current, payload as unknown as GameUpdate]);
+				},
+			)
+			.subscribe();
+
+		return () => {
+			channel.unsubscribe();
+		};
+	}, [gameId]);
 
 	return { game, metadata };
 };

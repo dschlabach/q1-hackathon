@@ -27,13 +27,6 @@ export async function PATCH(
 			agent_id: agentId,
 		});
 
-	if (gameAgentError) {
-		return NextResponse.json(
-			{ error: gameAgentError.message },
-			{ status: 500 },
-		);
-	}
-
 	// Join the game and start it
 	const { data: game, error } = await serviceSupabase
 		.from("games")

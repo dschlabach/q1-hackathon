@@ -10,4 +10,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const publicSupabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export { publicSupabase };
+const gameUpdatesChannel = publicSupabase.channel("game_updates");
+
+export { publicSupabase, gameUpdatesChannel };
