@@ -220,20 +220,17 @@ export function BattleLobbies({
                             )}
 
                             {/* Spectate link */}
-                            {selectedAgentId &&
-                              !isSelectedAgentInGame(game) && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    router.push(`/games/${game.id}`)
-                                  }
-                                  className="text-gray-400 text-sm hover:text-green-400 transition-colors"
-                                >
-                                  {getMyAgentInGame(game, address)
-                                    ? "View battle"
-                                    : "Spectate"}
-                                </button>
-                              )}
+                            {!isSelectedAgentInGame(game) && (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/games/${game.id}`)}
+                                className="text-gray-400 text-sm hover:text-green-400 transition-colors"
+                              >
+                                {getMyAgentInGame(game, address)
+                                  ? "View battle"
+                                  : "Spectate"}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
