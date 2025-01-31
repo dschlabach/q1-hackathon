@@ -14,7 +14,7 @@ export const useAgents = () => {
 			const { data, error } = await publicSupabase
 				.from("agents")
 				.select("*")
-				.eq("address", address);
+				.eq("address", address ?? "");
 			if (error) {
 				throw error;
 			}

@@ -44,7 +44,7 @@ export const useGame = (gameId: string) => {
 			.on(
 				"postgres_changes",
 				{
-					event: "INSERT",
+					event: "*",
 					schema: "public",
 					table: "game_updates",
 					filter: `game_id=eq.${gameId}`,

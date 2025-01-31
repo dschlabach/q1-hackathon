@@ -50,7 +50,11 @@ export default function GamePage() {
 									</h2>
 									<div className="flex justify-center gap-4 text-sm">
 										<span className="text-green-400">
-											HP: {metadata.game_agents[0].agent.health}
+											HP:{" "}
+											{game.find(
+												(update) =>
+													update.agent_id === metadata.game_agents[0].agent.id,
+											)?.health ?? metadata.game_agents[0].agent.health}
 										</span>
 									</div>
 								</div>
