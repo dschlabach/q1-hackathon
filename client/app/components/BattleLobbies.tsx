@@ -96,6 +96,11 @@ export function BattleLobbies({
   return (
     <div className="flex flex-col flex-1">
       <h1 className="text-2xl font-bold mb-3 text-white">Battle Lobbies</h1>
+      <p className="text-gray-400 mb-4 text-sm">
+        Create a battle lobby to challenge other agents. Select one of your
+        agents first, then create a lobby where others can join to battle
+        against your agent.
+      </p>
 
       <div className="w-full max-w-2xl">
         {isLoadingGames ? (
@@ -108,18 +113,13 @@ export function BattleLobbies({
           </div>
         ) : (
           <div className="flex flex-col">
-            <p className="text-gray-400 mb-4 text-sm">
-              Create a battle lobby to challenge other agents. Select one of
-              your agents first, then create a lobby where others can join to
-              battle against your agent.
-            </p>
             <button
               type="button"
               onClick={handleCreateLobby}
               disabled={
                 !selectedAgentId || isCreatingGame || isSelectedAgentInAnyGame()
               }
-              className={`mb-8 py-2 px-6 rounded-md transition-all duration-200 
+              className={`mb-4 py-2 px-6 rounded-md transition-all duration-200
                 ${
                   selectedAgentId &&
                   !isCreatingGame &&
@@ -136,103 +136,105 @@ export function BattleLobbies({
                 ? "Agent Already in Lobby"
                 : "Create New Lobby"}
             </button>
-            {games?.length === 0 ? (
-              <div className="text-gray-400 text-center">
-                There are no lobby rooms active. Create one to get started!
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {games?.map((game) => (
-                  <div
-                    key={game.id}
-                    className="min-h-[104px] bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-200"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-white font-semibold">
-                          Game #{game.id}
-                        </h3>
-                        <p className="text-gray-400 text-sm mt-1">
-                          Created {new Date(game.created_at).toLocaleString()}
-                        </p>
-                        <div className="mt-3">
-                          <p className="text-gray-400 text-sm mb-2">
-                            Agents in lobby:
+            <div className="max-h-[60vh] overflow-y-auto">
+              {games?.length === 0 ? (
+                <div className="text-gray-400 text-center">
+                  There are no lobby rooms active. Create one to get started!
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {games?.map((game) => (
+                    <div
+                      key={game.id}
+                      className="min-h-[104px] bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-200"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-white font-semibold">
+                            Game #{game.id}
+                          </h3>
+                          <p className="text-gray-400 text-sm mt-1">
+                            Created {new Date(game.created_at).toLocaleString()}
                           </p>
-                          {game.game_agents?.map((gameAgent) => (
-                            <div
-                              key={gameAgent.agent.id}
-                              className="flex items-center gap-2 mb-1"
-                            >
-                              <div className="w-6 h-6 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-xs border border-green-400">
-                                {gameAgent.agent.name?.[0]}
-                              </div>
-                              <span
-                                className={`text-sm ${
-                                  isMyAgent(
+                          <div className="mt-3">
+                            <p className="text-gray-400 text-sm mb-2">
+                              Agents in lobby:
+                            </p>
+                            {game.game_agents?.map((gameAgent) => (
+                              <div
+                                key={gameAgent.agent.id}
+                                className="flex items-center gap-2 mb-1"
+                              >
+                                <div className="w-6 h-6 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-xs border border-green-400">
+                                  {gameAgent.agent.name?.[0]}
+                                </div>
+                                <span
+                                  className={`text-sm ${
+                                    isMyAgent(
+                                      gameAgent.agent.address ?? "",
+                                      address
+                                    )
+                                      ? "text-green-400"
+                                      : "text-gray-400"
+                                  }`}
+                                >
+                                  {gameAgent.agent.name}
+                                  {isMyAgent(
                                     gameAgent.agent.address ?? "",
                                     address
-                                  )
-                                    ? "text-green-400"
-                                    : "text-gray-400"
-                                }`}
+                                  ) && " (You)"}
+                                </span>
+                                <span className="text-gray-500 text-xs">
+                                  (HP: {gameAgent.agent.health})
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4 flex items-center gap-4">
+                            {/* Show different buttons/text based on game state */}
+                            {game.game_agents.length >= 2 ? (
+                              <span className="text-gray-500 text-sm">
+                                Battle in progress
+                              </span>
+                            ) : getMyAgentInGame(game, address) ? (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/games/${game.id}`)}
+                                className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
                               >
-                                {gameAgent.agent.name}
-                                {isMyAgent(
-                                  gameAgent.agent.address ?? "",
-                                  address
-                                ) && " (You)"}
+                                Return to Battle
+                              </button>
+                            ) : selectedAgentId &&
+                              !isSelectedAgentInGame(game) ? (
+                              <button
+                                type="button"
+                                onClick={() => handleJoinBattle(game)}
+                                className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                              >
+                                Join Battle
+                              </button>
+                            ) : (
+                              <span className="text-gray-500 text-sm">
+                                Select an agent to join
                               </span>
-                              <span className="text-gray-500 text-xs">
-                                (HP: {gameAgent.agent.health})
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-4 flex items-center gap-4">
-                          {/* Show different buttons/text based on game state */}
-                          {game.game_agents.length >= 2 ? (
-                            <span className="text-gray-500 text-sm">
-                              Battle in progress
-                            </span>
-                          ) : getMyAgentInGame(game, address) ? (
+                            )}
+
+                            {/* Spectate link */}
                             <button
                               type="button"
                               onClick={() => router.push(`/games/${game.id}`)}
-                              className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
+                              className="text-gray-400 text-sm hover:text-green-400 transition-colors"
                             >
-                              Return to Battle
+                              Spectate
                             </button>
-                          ) : selectedAgentId &&
-                            !isSelectedAgentInGame(game) ? (
-                            <button
-                              type="button"
-                              onClick={() => handleJoinBattle(game)}
-                              className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"
-                            >
-                              Join Battle
-                            </button>
-                          ) : (
-                            <span className="text-gray-500 text-sm">
-                              Select an agent to join
-                            </span>
-                          )}
-
-                          {/* Spectate link */}
-                          <button
-                            type="button"
-                            onClick={() => router.push(`/games/${game.id}`)}
-                            className="text-gray-400 text-sm hover:text-green-400 transition-colors"
-                          >
-                            Spectate
-                          </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
