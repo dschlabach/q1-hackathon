@@ -144,7 +144,9 @@ export async function POST(req: Request) {
       console.error("Error processing battle completion:", error);
     }
 
-    return result;
+    return new Response(JSON.stringify({ message: "Battle completed" }), {
+      status: 200,
+    });
   } catch (error) {
     console.error("Battle error:", error);
     return new Response(JSON.stringify({ error: "Failed to process battle" }), {
