@@ -6,6 +6,7 @@ import ConnectedWallet from "@/app/components/ConnectedWallet";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { useAgentSelection } from "@/app/hooks/useAgentSelection";
+import BattleAgentCard from "@/app/components/BattleAgentCard";
 
 const ORCHESTRATOR_ID = 9999999;
 
@@ -64,42 +65,20 @@ export default function GamePage() {
         <div className="flex justify-between items-start gap-4">
           {/* Left Agent */}
           <div className="flex-1">
-            <div
-              className={`bg-gray-800 p-6 rounded-lg ${
-                metadata.game_agents[0] &&
-                isMyAgent(metadata.game_agents[0].agent.address, address)
-                  ? "border-4 border-green-400"
-                  : "border border-gray-700"
-              }`}
-            >
-              {metadata.game_agents[0] && (
-                <div>
-                  <div className="w-16 h-16 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-2xl border-2 border-green-400 mx-auto mb-4">
-                    {metadata.game_agents[0].agent.name?.[0]}
-                  </div>
-                  <h2 className="text-xl font-bold text-center text-white mb-2">
-                    {metadata.game_agents[0].agent.name}
-                  </h2>
-                  <div className="flex justify-center gap-4 text-sm">
-                    <span className="text-green-400">
-                      HP:{" "}
-                      {game.find(
-                        (update) =>
-                          update.agent_id === metadata.game_agents[0].agent.id
-                      )?.health ?? metadata.game_agents[0].agent.health}
-                    </span>
-                  </div>
-                  {isMyAgent(
-                    metadata.game_agents[0].agent.address,
-                    address
-                  ) && (
-                    <div className="text-gray-500 text-center mt-1 italic">
-                      Your agent
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <BattleAgentCard
+              agent={metadata.game_agents[0]}
+              isMyAgent={
+                metadata.game_agents[0]
+                  ? isMyAgent(metadata.game_agents[0].agent.address, address)
+                  : false
+              }
+              currentHealth={
+                game.find(
+                  (update) =>
+                    update.agent_id === metadata.game_agents[0]?.agent.id
+                )?.health
+              }
+            />
           </div>
 
           {/* Battle Text Area */}
@@ -134,42 +113,15 @@ export default function GamePage() {
 
           {/* Right Agent */}
           <div className="flex-1">
-            <div
-              className={`bg-gray-800 p-6 rounded-lg ${
-                metadata.game_agents[1] &&
-                isMyAgent(metadata.game_agents[1].agent.address, address)
-                  ? "border-4 border-green-400"
-                  : "border border-gray-700"
-              }`}
-            >
-              {metadata.game_agents[1] ? (
-                <div>
-                  <div className="w-16 h-16 bg-gray-700 text-green-400 rounded-full flex items-center justify-center text-2xl border-2 border-green-400 mx-auto mb-4">
-                    {metadata.game_agents[1].agent.name?.[0]}
-                  </div>
-                  <h2 className="text-xl font-bold text-center text-white mb-2">
-                    {metadata.game_agents[1].agent.name}
-                  </h2>
-                  <div className="flex justify-center gap-4 text-sm">
-                    <span className="text-green-400">
-                      HP: {metadata.game_agents[1].agent.health}
-                    </span>
-                  </div>
-                  {isMyAgent(
-                    metadata.game_agents[1].agent.address,
-                    address
-                  ) && (
-                    <div className="text-gray-500 text-center mt-1 italic">
-                      Your agent
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center text-gray-400">
-                  Waiting for opponent...
-                </div>
-              )}
-            </div>
+            <BattleAgentCard
+              agent={metadata.game_agents[1]}
+              isMyAgent={
+                metadata.game_agents[1]
+                  ? isMyAgent(metadata.game_agents[1].agent.address, address)
+                  : false
+              }
+              currentHealth={metadata.game_agents[1]?.agent.health ?? undefined}
+            />
           </div>
         </div>
       </div>
