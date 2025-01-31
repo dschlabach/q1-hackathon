@@ -3,9 +3,20 @@ import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
 export type GameUpdate = {
-	agent_id: number;
-	text: string;
-	health?: number;
+  agent_id: number;
+  text: string;
+  health?: number;
+};
+
+type Agent = {
+  health: number;
+};
+
+type Payload = {
+  new: {
+    agent_id: number;
+    health: number;
+  };
 };
 
 /**
@@ -14,52 +25,60 @@ export type GameUpdate = {
  * @returns The game data
  */
 export const useGame = (gameId: string) => {
-	const [game, setGame] = useState<GameUpdate[]>([]);
+  const [game, setGame] = useState<GameUpdate[]>([]);
 
-	const { data: metadata } = useQuery({
-		queryKey: ["games", gameId],
-		queryFn: async () => {
-			const { data, error } = await publicSupabase
-				.from("games")
-				.select(`
+  const { data: metadata } = useQuery({
+    queryKey: ["games", gameId],
+    queryFn: async () => {
+      const { data, error } = await publicSupabase
+        .from("games")
+        .select(
+          `
 					*,
 					game_agents (
 						*,
 						agent: agents (*)
 					)
-				`)
-				.eq("id", Number(gameId))
-				.single();
+				`
+        )
+        .eq("id", Number(gameId))
+        .single();
 
-			if (error) {
-				throw error;
-			}
-			return data;
-		},
-	});
+      if (error) {
+        throw error;
+      }
+      return data;
+    },
+  });
 
-	useEffect(() => {
-		const channel = publicSupabase
-			.channel("game_updates")
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "game_updates",
-					filter: `game_id=eq.${gameId}`,
-				},
-				(payload) => {
-					console.log("payload:", payload);
-					setGame((current) => [...current, payload as unknown as GameUpdate]);
-				},
-			)
-			.subscribe();
+  useEffect(() => {
+    const channel = publicSupabase
+      .channel("game_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "game_updates",
+          filter: `game_id=eq.${gameId}`,
+        },
+        (payload: Payload) => {
+          console.log("payload:", payload);
 
-		return () => {
-			channel.unsubscribe();
-		};
-	}, [gameId]);
+          setGame((current) => [...current, payload as unknown as GameUpdate]);
 
-	return { game, metadata };
+          publicSupabase.from("agents").upsert({
+            agent_id: payload.new.agent_id,
+            health: payload.new.health,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [gameId]);
+
+  return { game, metadata };
 };

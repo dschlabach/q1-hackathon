@@ -65,6 +65,8 @@ export async function PATCH(
       gameId,
       agent1Prompt: gameAgents?.[0]?.agents?.prompt,
       agent2Prompt: gameAgents?.[1]?.agents?.prompt,
+      agent1Id: gameAgents?.[0]?.agent_id,
+      agent2Id: gameAgents?.[1].agent_id,
     }),
   });
 

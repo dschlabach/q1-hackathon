@@ -1,25 +1,16 @@
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { serviceSupabase } from "@/database/server";
-import { trim } from "viem";
 
 export const maxDuration = 60;
 
 const ORCHESTRATOR_ID = 9999999;
 
-/** Post will need agents initial prompt
- *  {
- *      agent1Prompt: "",
- *      agent2Prompt: ""
- *  }
- *
- *
- * will return "streamed text data, and "
- */
-
 interface BattleRequest {
   agent1Prompt: string;
   agent2Prompt: string;
+  agent1Id: number;
+  agent2Id: number;
   gameId: number;
 }
 
@@ -35,42 +26,6 @@ interface BattleResponse {
   agent2: AgentStatus;
   winner?: 1 | 2;
 }
-
-const BATTLE_SYSTEM_PROMPT = `You are a battle orchestrator managing a turn-based combat between two AI agents.
-Rules:
-- Each agent starts with 100 health
-- But the health must decrement so you will need to know the health of the last state for each agent. Health should never go back to 100 after being dealt damage.
-- Combat proceeds in rounds, with each agent taking turns
-- Each round should describe:
-  * The action taken by each agent
-  * The damage dealt (between 5-25 per successful hit)
-  * Current health status
-- Consider special abilities based on agent descriptions
-- Battle ends when one agent reaches 0 health
-- If the battle is not finished, continue the battle
-- If the battle is finished, return the winner
-- Never deal 0 damage
-- Damage must ALWAYS be dealt!
-- HEALTH CAN NEVER INCREASE
-- You MUST always decrease an agents health, either one or both but someones health must be decreased and that decreased health returned the in the resposne this is non negtoiable.
-- Preferably this is no longer than 10 rounds but it is okay to go to 15.
-
-Respond with a JSON structure for each round:
-{
-  "round": number,
-  "narration": "Detailed description of the round's events",
-  "agent1": {
-    "action": "Description of agent 1's action",
-    "damageDealt": number,
-    "currentHealth": number
-  },
-  "agent2": {
-    "action": "Description of agent 2's action",
-    "damageDealt": number,
-    "currentHealth": number
-  },
-  "winner": 1 | 2 | null
-}`;
 
 async function saveGameUpdate(
   gameId: number,
@@ -96,7 +51,7 @@ async function saveGameUpdate(
 
 export async function POST(req: Request) {
   try {
-    const { agent1Prompt, agent2Prompt, gameId } =
+    const { agent1Prompt, agent2Prompt, gameId, agent1Id, agent2Id } =
       (await req.json()) as BattleRequest;
 
     if (!agent1Prompt || !agent2Prompt || !gameId) {
@@ -105,6 +60,42 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const BATTLE_SYSTEM_PROMPT = `You are a battle orchestrator managing a turn-based combat between two AI agents.
+Rules:
+- Each agent starts with 100 health
+- But the health must decrement so you will need to know the health of the last state for each agent. Health should never go back to 100 after being dealt damage.
+- Combat proceeds in rounds, with each agent taking turns
+- Each round should describe:
+  * The action taken by each agent
+  * The damage dealt (between 5-25 per successful hit)
+  * Current health status
+- Consider special abilities based on agent descriptions
+- Battle ends when one agent reaches 0 health
+- If the battle is not finished, continue the battle
+- If the battle is finished, return the winner
+- Never deal 0 damage
+- Damage must ALWAYS be dealt!
+- HEALTH CAN NEVER INCREASE
+- You MUST always decrease an agents health, either one or both but someones health must be decreased and that decreased health returned the in the resposne this is non negtoiable.
+- Preferably this is no longer than 10 rounds but it is okay to go to 15.
+
+Respond with a JSON structure for each round:
+{
+  "round": number,
+  "narration": "Detailed description of the round's events",
+  agent1: {
+    "action": "Description of agent 1's action",
+    "damageDealt": number,
+    "currentHealth": number
+  },
+ agent2: {
+    "action": "Description of agent 2's action",
+    "damageDealt": number,
+    "currentHealth": number
+  },
+  "winner": 1 | 2 | null
+}`;
 
     let agent1Health = 100;
     let agent2Health = 100;
@@ -143,14 +134,14 @@ export async function POST(req: Request) {
 
         // Save Agent 1's update
         await saveGameUpdate(gameId, {
-          agent_id: 1,
+          agent_id: agent1Id,
           text: battleData.agent1.action,
           health: agent1Health,
         });
 
         // Save Agent 2's update
         await saveGameUpdate(gameId, {
-          agent_id: 2,
+          agent_id: agent2Id,
           text: battleData.agent2.action,
           health: agent2Health,
         });
