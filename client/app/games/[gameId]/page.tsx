@@ -24,6 +24,26 @@ export default function GamePage() {
     );
   }
 
+  // Shared props for left agent
+  const leftAgentProps = {
+    agent: metadata.game_agents[0],
+    isMyAgent: metadata.game_agents[0]
+      ? isMyAgent(metadata.game_agents[0].agent.address, address)
+      : false,
+    currentHealth: game.find(
+      (update) => update.agent_id === metadata.game_agents[0]?.agent.id
+    )?.health,
+  };
+
+  // Shared props for right agent
+  const rightAgentProps = {
+    agent: metadata.game_agents[1],
+    isMyAgent: metadata.game_agents[1]
+      ? isMyAgent(metadata.game_agents[1].agent.address, address)
+      : false,
+    currentHealth: metadata.game_agents[1]?.agent.health ?? undefined,
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center p-8 pt-20 bg-gray-900">
       <div className="absolute top-4 left-4">
@@ -67,54 +87,18 @@ export default function GamePage() {
           <div className="flex w-full gap-4 sm:hidden">
             {/* Left Agent - Mobile */}
             <div className="flex-1">
-              <BattleAgentCard
-                agent={metadata.game_agents[0]}
-                isMyAgent={
-                  metadata.game_agents[0]
-                    ? isMyAgent(metadata.game_agents[0].agent.address, address)
-                    : false
-                }
-                currentHealth={
-                  game.find(
-                    (update) =>
-                      update.agent_id === metadata.game_agents[0]?.agent.id
-                  )?.health
-                }
-              />
+              <BattleAgentCard {...leftAgentProps} />
             </div>
 
             {/* Right Agent - Mobile */}
             <div className="flex-1">
-              <BattleAgentCard
-                agent={metadata.game_agents[1]}
-                isMyAgent={
-                  metadata.game_agents[1]
-                    ? isMyAgent(metadata.game_agents[1].agent.address, address)
-                    : false
-                }
-                currentHealth={
-                  metadata.game_agents[1]?.agent.health ?? undefined
-                }
-              />
+              <BattleAgentCard {...rightAgentProps} />
             </div>
           </div>
 
           {/* Left Agent - Desktop */}
           <div className="hidden sm:block sm:flex-1">
-            <BattleAgentCard
-              agent={metadata.game_agents[0]}
-              isMyAgent={
-                metadata.game_agents[0]
-                  ? isMyAgent(metadata.game_agents[0].agent.address, address)
-                  : false
-              }
-              currentHealth={
-                game.find(
-                  (update) =>
-                    update.agent_id === metadata.game_agents[0]?.agent.id
-                )?.health
-              }
-            />
+            <BattleAgentCard {...leftAgentProps} />
           </div>
 
           {/* Battle Text Area */}
@@ -149,15 +133,7 @@ export default function GamePage() {
 
           {/* Right Agent - Desktop */}
           <div className="hidden sm:block sm:flex-1">
-            <BattleAgentCard
-              agent={metadata.game_agents[1]}
-              isMyAgent={
-                metadata.game_agents[1]
-                  ? isMyAgent(metadata.game_agents[1].agent.address, address)
-                  : false
-              }
-              currentHealth={metadata.game_agents[1]?.agent.health ?? undefined}
-            />
+            <BattleAgentCard {...rightAgentProps} />
           </div>
         </div>
       </div>
