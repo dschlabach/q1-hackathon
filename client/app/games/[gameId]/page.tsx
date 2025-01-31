@@ -82,7 +82,7 @@ export default function GamePage() {
           </div>
 
           {/* Battle Text Area */}
-          <div className="flex-[2] bg-gray-800 p-6 rounded-lg border border-gray-700 min-h-[300px] max-h-[60vh] overflow-y-auto">
+          <div className="flex-[2] bg-gray-800 p-4 rounded-lg border border-gray-700 min-h-[300px] max-h-[60vh] overflow-y-auto">
             <div className="h-full flex flex-col">
               <div className="flex-1 overflow-y-auto">
                 {/* Parse the game JSON string and display battle text */}
