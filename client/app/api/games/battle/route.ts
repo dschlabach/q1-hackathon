@@ -1,6 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { serviceSupabase } from "@/database/server";
+import { trim } from "viem";
 
 export const maxDuration = 60;
 
@@ -38,6 +39,7 @@ interface BattleResponse {
 const BATTLE_SYSTEM_PROMPT = `You are a battle orchestrator managing a turn-based combat between two AI agents.
 Rules:
 - Each agent starts with 100 health
+- But the health must decrement so you will need to know the health of the last state for each agent. Health should never go back to 100 after being dealt damage.
 - Combat proceeds in rounds, with each agent taking turns
 - Each round should describe:
   * The action taken by each agent
@@ -48,6 +50,10 @@ Rules:
 - If the battle is not finished, continue the battle
 - If the battle is finished, return the winner
 - Never deal 0 damage
+- Damage must ALWAYS be dealt!
+- HEALTH CAN NEVER INCREASE
+- You MUST always decrease an agents health, either one or both but someones health must be decreased and that decreased health returned the in the resposne this is non negtoiable.
+- Preferably this is no longer than 10 rounds but it is okay to go to 15.
 
 Respond with a JSON structure for each round:
 {
@@ -114,7 +120,7 @@ export async function POST(req: Request) {
       ];
 
       const result = await generateText({
-        model: openai("gpt-3.5-turbo"),
+        model: openai("gpt-4o"),
         messages,
       });
 
@@ -122,7 +128,10 @@ export async function POST(req: Request) {
       console.log("***** the response is *****", fullResponse);
 
       try {
-        const battleData = JSON.parse(fullResponse) as BattleResponse;
+        const cleanedResponse = fullResponse
+          .replace(/^```json\n|```$/g, "")
+          .trim();
+        const battleData = JSON.parse(cleanedResponse) as BattleResponse;
         await saveGameUpdate(gameId, {
           agent_id: ORCHESTRATOR_ID,
           text: battleData.narration,
