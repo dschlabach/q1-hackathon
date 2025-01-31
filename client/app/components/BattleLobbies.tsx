@@ -192,11 +192,7 @@ export function BattleLobbies({
                           </div>
                           <div className="mt-4 flex items-center gap-4">
                             {/* Show different buttons/text based on game state */}
-                            {game.game_agents.length >= 2 ? (
-                              <span className="text-gray-500 text-sm">
-                                Battle in progress
-                              </span>
-                            ) : getMyAgentInGame(game, address) ? (
+                            {selectedAgentId && isSelectedAgentInGame(game) ? (
                               <button
                                 type="button"
                                 onClick={() => router.push(`/games/${game.id}`)}
@@ -204,6 +200,10 @@ export function BattleLobbies({
                               >
                                 Return to Battle
                               </button>
+                            ) : game.game_agents.length >= 2 ? (
+                              <span className="text-gray-500 text-sm">
+                                Battle in progress
+                              </span>
                             ) : selectedAgentId &&
                               !isSelectedAgentInGame(game) ? (
                               <button
