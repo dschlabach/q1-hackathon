@@ -205,7 +205,7 @@ export function BattleLobbies({
                                 Battle in progress
                               </span>
                             ) : selectedAgentId &&
-                              !isSelectedAgentInGame(game) ? (
+                              !isSelectedAgentInAnyGame() ? (
                               <button
                                 type="button"
                                 onClick={() => handleJoinBattle(game)}
