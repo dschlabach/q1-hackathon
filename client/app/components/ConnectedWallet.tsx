@@ -40,9 +40,9 @@ export default function ConnectedWallet() {
               chain={base}
               className="h-8 w-8 rounded-full bg-green-400 opacity-90 group-hover:opacity-100"
             />
-            <Address className="text-gray-300" />
+            <Address className="text-gray-300 text-lg" />
           </Identity>
-          <WalletDropdownDisconnect className="bg-gray-800 text-white fill-white hover:text-white hover:bg-gray-700" />
+          <WalletDropdownDisconnect className="bg-gray-800 text-white fill-white hover:text-white hover:bg-gray-700 [&_svg]:!fill-white [&_path]:!fill-white" />
         </WalletDropdown>
       </Wallet>
     </div>

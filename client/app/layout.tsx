@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata = {
-  title: "Web3 App",
+  title: "Agent Battles",
   description: "A Web3 application using OnchainKit",
 };
 
