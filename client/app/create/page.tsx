@@ -9,7 +9,7 @@ import { useNextAgent } from "../hooks/useNextAgent";
 import { useCreateAgent } from "../hooks/useCreateAgent";
 import Link from "next/link";
 
-const CONTRACT_ADDRESS = "0x81d5A4FB9327033b6d31b08705cdFE9633BFAc9A" as const;
+const CONTRACT_ADDRESS = "0x200FfD0A1Cf41b8E9a5DD96f7c93da44d7cf7Dbd" as const;
 
 const CONTRACT_ABI = [
   {

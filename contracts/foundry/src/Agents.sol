@@ -31,7 +31,7 @@ contract Agents is Ownable {
     function transferFundsToWinner(address payable winnerAddress) external onlyOwner {
         require(address(this).balance > 0, "Contract has no funds");
 
-        (bool success, ) = winnerAddress.call{value: address(this).balance}("");
+        (bool success, ) = winnerAddress.call{value: 0.01 ether}("");
         require(success, "Transfer failed");
     }
 

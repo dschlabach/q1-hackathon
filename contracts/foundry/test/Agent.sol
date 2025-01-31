@@ -52,14 +52,14 @@ contract AgentsTest is Test {
     function testTransferFundsToWinner() public {
         // Fund contract
         vm.startPrank(alice);
-        agents.createAgent{value: 0.02 ether}(3);
+        agents.createAgent{value: 0.01 ether}(3);
         vm.stopPrank();
 
         // Transfer to owner
         vm.startPrank(owner);
         uint256 balanceBefore = owner.balance;
         agents.transferFundsToWinner(payable(owner));
-        assertEq(owner.balance, balanceBefore + 0.02 ether);
+        assertEq(owner.balance, balanceBefore + 0.01 ether);
         vm.stopPrank();
     }
 }
