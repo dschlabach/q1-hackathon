@@ -124,7 +124,7 @@ export default function CreateAgent() {
   const isLoading = isCreating || isContractLoading;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-24 bg-gray-900">
       <div className="absolute top-4 left-4">
         <Link
           href="/profile"

@@ -44,7 +44,7 @@ export default function GamePage() {
             Spectating
           </div>
         )}
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">
+        <h1 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-6 text-center text-white">
           Battle Arena #{gameId}
         </h1>
 
@@ -62,9 +62,45 @@ export default function GamePage() {
           </div>
         </div>
 
-        <div className="flex justify-between items-start gap-4">
-          {/* Left Agent */}
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          {/* Agents Container for mobile only */}
+          <div className="flex w-full gap-4 sm:hidden">
+            {/* Left Agent - Mobile */}
+            <div className="flex-1">
+              <BattleAgentCard
+                agent={metadata.game_agents[0]}
+                isMyAgent={
+                  metadata.game_agents[0]
+                    ? isMyAgent(metadata.game_agents[0].agent.address, address)
+                    : false
+                }
+                currentHealth={
+                  game.find(
+                    (update) =>
+                      update.agent_id === metadata.game_agents[0]?.agent.id
+                  )?.health
+                }
+              />
+            </div>
+
+            {/* Right Agent - Mobile */}
+            <div className="flex-1">
+              <BattleAgentCard
+                agent={metadata.game_agents[1]}
+                isMyAgent={
+                  metadata.game_agents[1]
+                    ? isMyAgent(metadata.game_agents[1].agent.address, address)
+                    : false
+                }
+                currentHealth={
+                  metadata.game_agents[1]?.agent.health ?? undefined
+                }
+              />
+            </div>
+          </div>
+
+          {/* Left Agent - Desktop */}
+          <div className="hidden sm:block sm:flex-1">
             <BattleAgentCard
               agent={metadata.game_agents[0]}
               isMyAgent={
@@ -82,7 +118,7 @@ export default function GamePage() {
           </div>
 
           {/* Battle Text Area */}
-          <div className="flex-[2] bg-gray-800 p-4 rounded-lg border border-gray-700 min-h-[300px] max-h-[60vh] overflow-y-auto">
+          <div className="w-full sm:flex-[2] bg-gray-800 p-4 rounded-lg border border-gray-700 min-h-[300px] max-h-[60vh] overflow-y-auto">
             <div className="h-full flex flex-col">
               <div className="flex-1 overflow-y-auto">
                 {/* Parse the game JSON string and display battle text */}
@@ -111,8 +147,8 @@ export default function GamePage() {
             </div>
           </div>
 
-          {/* Right Agent */}
-          <div className="flex-1">
+          {/* Right Agent - Desktop */}
+          <div className="hidden sm:block sm:flex-1">
             <BattleAgentCard
               agent={metadata.game_agents[1]}
               isMyAgent={
