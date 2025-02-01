@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject } from "ai";
 import { serviceSupabase } from "@/database/server";
-
+import { z } from "zod";
 export const maxDuration = 60;
 
 const ORCHESTRATOR_ID = 9999999;
@@ -82,7 +82,7 @@ Rules:
 - Combat proceeds in rounds, with each agent taking turns
 - Each round should describe:
   * The action taken by each agent
-  * The damage dealt (between 5-25 per successful hit)
+  * The damage dealt (between 15-30 per successful hit)
   * Current health status
 - Consider special abilities based on agent descriptions
 - Battle ends when one agent reaches 0 health
@@ -90,7 +90,7 @@ Rules:
 - If the battle is finished, return the winner
 - Never deal 0 damage
 - Damage must ALWAYS be dealt!
-- HEALTH CAN NEVER INCREASE
+- HEALTH CAN NEVER INCREASE - THIS IS VERY IMPORTANT. IF AN AGENT DOESN'T TAKE DAMAGE, LEAVE HEALTH THE SAME. 
 - You MUST always decrease an agents health, either one or both but someones health must be decreased and that decreased health returned the in the resposne this is non negtoiable.
 - Preferably this is no longer than 10 rounds but it is okay to go to 15.
 
@@ -124,19 +124,31 @@ Respond with a JSON structure for each round:
 				},
 			];
 
-			const result = await generateText({
+			const result = await generateObject({
 				model: openai("gpt-4o"),
 				messages,
+				schema: z.object({
+					round: z.number(),
+					narration: z.string(),
+					agent1: z.object({
+						action: z.string(),
+						damageDealt: z.number(),
+						currentHealth: z.number(),
+					}),
+					agent2: z.object({
+						action: z.string(),
+						damageDealt: z.number(),
+						currentHealth: z.number(),
+					}),
+					winner: z.number().nullable(),
+				}),
 			});
 
-			const fullResponse = await result.text;
+			const fullResponse = result.object;
 			console.log("***** the response is *****", fullResponse);
 
 			try {
-				const cleanedResponse = fullResponse
-					.replace(/^```json\n|```$/g, "")
-					.trim();
-				const battleData = JSON.parse(cleanedResponse) as BattleResponse;
+				const battleData = fullResponse as BattleResponse;
 				await saveGameUpdate(gameId, {
 					agent_id: ORCHESTRATOR_ID,
 					text: battleData.narration,

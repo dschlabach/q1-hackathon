@@ -24,5 +24,6 @@ export const useGames = () => {
 			}
 			return data;
 		},
+		refetchInterval: 3_000, // 3 seconds
 	});
 };

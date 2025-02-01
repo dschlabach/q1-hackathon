@@ -3,20 +3,16 @@ import { publicSupabase } from "@/database/client";
 import { useQuery } from "@tanstack/react-query";
 
 export type GameUpdate = {
-  agent_id: number;
-  text: string;
-  health?: number;
-};
-
-type Agent = {
-  health: number;
+	agent_id: number;
+	text: string;
+	health?: number;
 };
 
 type Payload = {
-  new: {
-    agent_id: number;
-    health: number;
-  };
+	new: {
+		agent_id: number;
+		health: number;
+	};
 };
 
 /**
@@ -25,60 +21,76 @@ type Payload = {
  * @returns The game data
  */
 export const useGame = (gameId: string) => {
-  const [game, setGame] = useState<GameUpdate[]>([]);
+	const [game, setGame] = useState<GameUpdate[]>([]);
 
-  const { data: metadata } = useQuery({
-    queryKey: ["games", gameId],
-    queryFn: async () => {
-      const { data, error } = await publicSupabase
-        .from("games")
-        .select(
-          `
+	const { data: metadata } = useQuery({
+		queryKey: ["games", gameId],
+		queryFn: async () => {
+			const { data, error } = await publicSupabase
+				.from("games")
+				.select(
+					`
 					*,
 					game_agents (
 						*,
 						agent: agents (*)
 					)
-				`
-        )
-        .eq("id", Number(gameId))
-        .single();
+				`,
+				)
+				.eq("id", Number(gameId))
+				.single();
 
-      if (error) {
-        throw error;
-      }
-      return data;
-    },
-  });
+			if (error) {
+				throw error;
+			}
+			return data;
+		},
+		refetchInterval: 1_000, // every second
+	});
 
-  useEffect(() => {
-    const channel = publicSupabase
-      .channel("game_updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "game_updates",
-          filter: `game_id=eq.${gameId}`,
-        },
-        (payload: Payload) => {
-          console.log("payload:", payload);
+	const { data: gameHistory } = useQuery({
+		queryKey: ["game_updates", gameId],
+		queryFn: async () => {
+			const { data } = await publicSupabase
+				.from("game_updates")
+				.select("*")
+				.eq("game_id", Number(gameId));
+			return (data as NonNullable<GameUpdate>[]) ?? [];
+		},
+	});
 
-          setGame((current) => [...current, payload as unknown as GameUpdate]);
+	useEffect(() => {
+		const channel = publicSupabase
+			.channel("game_updates")
+			.on(
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				"postgres_changes",
+				{
+					event: "*",
+					schema: "public",
+					table: "game_updates",
+					filter: `game_id=eq.${gameId}`,
+				},
+				(payload: Payload) => {
+					setGame((current) => [
+						...current,
+						payload.new as unknown as GameUpdate,
+					]);
+				},
+			)
+			.subscribe();
 
-          publicSupabase.from("agents").upsert({
-            agent_id: payload.new.agent_id,
-            health: payload.new.health,
-          });
-        }
-      )
-      .subscribe();
+		return () => {
+			channel.unsubscribe();
+		};
+	}, [gameId]);
 
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [gameId]);
-
-  return { game, metadata };
+	return {
+		game:
+			metadata?.status === "finished"
+				? (gameHistory ?? [])
+				: (game as GameUpdate[]),
+		metadata,
+	};
 };

@@ -109,16 +109,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          payout_hash: string | null
           status: string
         }
         Insert: {
           created_at?: string
           id?: never
+          payout_hash?: string | null
           status?: string
         }
         Update: {
           created_at?: string
           id?: never
+          payout_hash?: string | null
           status?: string
         }
         Relationships: []
