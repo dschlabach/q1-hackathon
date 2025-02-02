@@ -90,7 +90,9 @@ export const useGame = (gameId: string) => {
   const shouldReturnArchivedGame = metadata?.status === "finished" && !game;
 
   return {
-    game: shouldReturnArchivedGame ? gameHistory : game,
+    game: shouldReturnArchivedGame
+      ? gameHistory ?? ([] as GameUpdate[])
+      : (game as GameUpdate[]),
     metadata,
   };
 };
