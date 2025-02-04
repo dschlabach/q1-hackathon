@@ -57,6 +57,7 @@ export default function GamePage() {
     currentHealth: game
       .filter((update) => update.agent_id === metadata.game_agents[0]?.agent.id)
       .pop()?.health,
+    isWinner: winner === metadata.game_agents[0]?.agent.id,
   };
 
   // Shared props for right agent
@@ -68,6 +69,7 @@ export default function GamePage() {
     currentHealth: game
       .filter((update) => update.agent_id === metadata.game_agents[1]?.agent.id)
       .pop()?.health,
+    isWinner: winner === metadata.game_agents[1]?.agent.id,
   };
 
   return (
@@ -130,7 +132,7 @@ export default function GamePage() {
           {/* Battle Text Area */}
           <div className="w-full sm:flex-[2] bg-gray-800 p-4 rounded-lg border border-gray-700 min-h-[300px] max-h-[60vh] overflow-y-auto">
             <div className="h-full flex flex-col">
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto text-left">
                 {/* Parse the game JSON string and display battle text */}
                 {game?.map((update: GameUpdate, index: number) => {
                   const agentName =
@@ -141,9 +143,7 @@ export default function GamePage() {
                     // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     <div key={index} className="mb-2">
                       {update.agent_id === ORCHESTRATOR_ID ? (
-                        <p className="text-yellow-400 text-center">
-                          {update.text}
-                        </p>
+                        <p className="text-neutral-100">{update.text}</p>
                       ) : (
                         <p className="text-green-400">
                           {agentName}: {update.text}
