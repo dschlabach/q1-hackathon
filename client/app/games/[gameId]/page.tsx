@@ -39,6 +39,7 @@ export default function GamePage() {
   const winnerName =
     metadata?.game_agents.find((ga) => ga.agent.id === winner)?.agent.name ??
     "Unknown";
+  const gameIdNumber = parseInt(gameId as string) || undefined;
 
   if (!metadata) {
     return (
@@ -57,7 +58,7 @@ export default function GamePage() {
     currentHealth: game
       .filter((update) => update.agent_id === metadata.game_agents[0]?.agent.id)
       .pop()?.health,
-    isWinner: winner === metadata.game_agents[0]?.agent.id,
+    isWinner: true,
   };
 
   // Shared props for right agent
@@ -115,18 +116,18 @@ export default function GamePage() {
           <div className="flex w-full gap-4 sm:hidden">
             {/* Left Agent - Mobile */}
             <div className="flex-1">
-              <BattleAgentCard {...leftAgentProps} />
+              <BattleAgentCard {...leftAgentProps} gameId={gameIdNumber} />
             </div>
 
             {/* Right Agent - Mobile */}
             <div className="flex-1">
-              <BattleAgentCard {...rightAgentProps} />
+              <BattleAgentCard {...rightAgentProps} gameId={gameIdNumber} />
             </div>
           </div>
 
           {/* Left Agent - Desktop */}
           <div className="hidden sm:block sm:flex-1">
-            <BattleAgentCard {...leftAgentProps} />
+            <BattleAgentCard {...leftAgentProps} gameId={gameIdNumber} />
           </div>
 
           {/* Battle Text Area */}
@@ -167,7 +168,7 @@ export default function GamePage() {
 
           {/* Right Agent - Desktop */}
           <div className="hidden sm:block sm:flex-1">
-            <BattleAgentCard {...rightAgentProps} />
+            <BattleAgentCard {...rightAgentProps} gameId={gameIdNumber} />
           </div>
         </div>
       </div>
