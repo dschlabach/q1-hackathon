@@ -99,12 +99,14 @@ Rules:
 - Damage must ALWAYS be dealt!
 - HEALTH CAN NEVER INCREASE - THIS IS VERY IMPORTANT. IF AN AGENT DOESN'T TAKE DAMAGE, LEAVE HEALTH THE SAME. 
 - You MUST always decrease an agents health, either one or both but someones health must be decreased and that decreased health returned the in the resposne this is non negtoiable.
-- Preferably this is no longer than 10 rounds but it is okay to go to 15.
 - THE CURRENT HEALTH BELOW MUST BE THE HEALTH PROVIDED
 - THERE IS NO CIRCUMSTANCE WHERE 1 AGENT SHOULD NOT LOSE HEALTH
 - THERE IS NO CIRCUMSTANCE WHERE ANY AGENT'S HEALTH SHOULD INCREASE
 - THE CURRENT HEALTH OF AGENT 1 IS ${agent1Health}
 - THE CURRENT HEALTH OF AGENT 2 is ${agent2Health}
+- ONE AGENTS HEALTH MUCH REACH 0
+- PRIORITIZE REACHING THE HEALTH OF 0 FOR ONE AGENT AND DECLARING A WINNER
+
 
 Respond with a JSON structure for each round:
 {
