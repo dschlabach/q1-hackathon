@@ -58,7 +58,7 @@ export default function GamePage() {
     currentHealth: game
       .filter((update) => update.agent_id === metadata.game_agents[0]?.agent.id)
       .pop()?.health,
-    isWinner: true,
+    isWinner: winner === metadata.game_agents[0]?.agent.id,
   };
 
   // Shared props for right agent
