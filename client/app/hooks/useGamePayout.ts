@@ -6,7 +6,7 @@ export function useGamePayout(gameId: number) {
 			const response = await fetch(`/api/games/${gameId}/finish`, {
 				method: "POST",
 			});
-			return response.json();
+			return await response.json();
 		},
 	});
 }
