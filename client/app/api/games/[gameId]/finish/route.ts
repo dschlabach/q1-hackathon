@@ -14,10 +14,8 @@ const walletClient = createWalletClient({
 
 export async function POST(
 	req: Request,
-	{ params }: { params: { gameId: string } },
+	{ params }: { params: Promise<{ gameId: string }> },
 ) {
-	console.log("executing from", walletClient.account.address);
-
 	const { gameId: gameIdStr } = await params;
 	const gameId = Number(gameIdStr);
 
