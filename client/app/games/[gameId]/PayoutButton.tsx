@@ -2,10 +2,11 @@ import { useGamePayout } from "@/app/hooks/useGamePayout";
 
 export default function PayoutButton({ gameId }: { gameId: number }) {
 	const { mutate, isPending, data } = useGamePayout(gameId);
+	console.log("data:", data);
 
 	return data ? (
 		<a
-			href={`https://sepolia.basescan.org/tx/${data}`}
+			href={`https://sepolia.basescan.org/tx/${data.hash}`}
 			target="_blank"
 			rel="noopener noreferrer"
 			className="px-4 py-2 text-green-400 border border-green-400 rounded-md hover:bg-green-400 hover:text-gray-900 transition-all duration-200 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]"

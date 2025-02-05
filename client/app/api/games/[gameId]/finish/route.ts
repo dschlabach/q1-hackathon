@@ -3,6 +3,7 @@ import { serviceSupabase } from "@/database/server";
 import { NextResponse } from "next/server";
 import { createWalletClient, http, isAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { waitForTransactionReceipt } from "viem/actions";
 import { baseSepolia } from "viem/chains";
 
 const walletClient = createWalletClient({
@@ -15,6 +16,8 @@ export async function POST(
 	req: Request,
 	{ params }: { params: { gameId: string } },
 ) {
+	console.log("executing from", walletClient.account.address);
+
 	const { gameId: gameIdStr } = await params;
 	const gameId = Number(gameIdStr);
 
@@ -50,12 +53,18 @@ export async function POST(
 	}
 
 	// Post tx online
-	await walletClient.writeContract({
+	const destroyAgentTx = await walletClient.writeContract({
 		address: CONTRACT_ADDRESS,
 		abi: CONTRACT_ABI,
 		functionName: "destroyAgent",
 		args: [loserAgent as `0x${string}`, BigInt(gameIdStr)],
 	});
+
+	const destroyAgentReceipt = await waitForTransactionReceipt(walletClient, {
+		hash: destroyAgentTx,
+	});
+
+	console.log("destroyAgentReceipt", destroyAgentReceipt);
 
 	const winnerAgent = gameAgents?.find(
 		(ga) => ga?.agents?.health && ga.agents.health > 0,

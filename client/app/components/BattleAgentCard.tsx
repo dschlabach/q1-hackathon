@@ -61,7 +61,7 @@ export default function BattleAgentCard({
 						<div className="text-green-400 text-center mt-2 font-bold animate-pulse">
 							WINNER!
 						</div>
-						{isMyAgent && gameId && (
+						{gameId && (
 							<div className="mt-3 w-full flex justify-center align-center">
 								<PayoutButton gameId={gameId} />
 							</div>

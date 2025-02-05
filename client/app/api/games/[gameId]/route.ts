@@ -29,6 +29,14 @@ export async function PATCH(
 			agent_id: agentId,
 		});
 
+	if (gameAgentError) {
+		console.error("gameAgentError:", gameAgentError);
+		return NextResponse.json(
+			{ error: gameAgentError.message },
+			{ status: 500 },
+		);
+	}
+
 	// Join the game and start it
 	const { data: game, error } = await serviceSupabase
 		.from("games")
@@ -56,6 +64,8 @@ export async function PATCH(
 		)
 		.eq("game_id", Number(gameId));
 
+	console.log("gameAgents:", gameAgents);
+
 	// Initialize game via serverless function
 	await fetch(`${API_URL}/api/games/battle`, {
 		method: "POST",
@@ -64,7 +74,7 @@ export async function PATCH(
 			agent1Prompt: gameAgents?.[0]?.agents?.prompt,
 			agent2Prompt: gameAgents?.[1]?.agents?.prompt,
 			agent1Id: gameAgents?.[0]?.agent_id,
-			agent2Id: gameAgents?.[1].agent_id,
+			agent2Id: gameAgents?.[1]?.agent_id ?? agentId,
 		}),
 	});
 

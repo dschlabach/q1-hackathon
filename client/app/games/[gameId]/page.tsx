@@ -9,19 +9,28 @@ import { useAgentSelection } from "@/app/hooks/useAgentSelection";
 import BattleAgentCard from "@/app/components/BattleAgentCard";
 
 const getGameWinner = (game: GameUpdate[]) => {
-	const lastUpdate = game
-		.filter((update) => update.agent_id !== ORCHESTRATOR_ID)
-		.pop();
-	if (!lastUpdate) {
+	const agentUpdates = game.filter(
+		(update) => update.agent_id !== ORCHESTRATOR_ID,
+	);
+
+	if (!agentUpdates) {
+		return null;
+	}
+
+	const winningUpdate = agentUpdates
+		.reverse()
+		.find((update) => update.health === 0);
+
+	if (!winningUpdate) {
 		return null;
 	}
 
 	// If one of the agents is dead, the other agent wins
-	if (lastUpdate.health === 0) {
+	if (winningUpdate.health === 0) {
 		// return the other agent id
 		return game.find(
 			(update) =>
-				update.agent_id !== lastUpdate.agent_id &&
+				update.agent_id !== winningUpdate.agent_id &&
 				update.agent_id !== ORCHESTRATOR_ID,
 		)?.agent_id;
 	}
@@ -33,6 +42,7 @@ const ORCHESTRATOR_ID = 9999999;
 export default function GamePage() {
 	const { gameId } = useParams();
 	const { game, metadata } = useGame(gameId as string);
+
 	const { address } = useAccount();
 	const { isMyAgent } = useAgentSelection();
 	const winner = getGameWinner(game as GameUpdate[]);
